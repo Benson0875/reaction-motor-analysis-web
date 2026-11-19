@@ -22,3 +22,5 @@ button{appearance:none;border:1px solid var(--line);border-radius:8px;background
 .usage-steps-title{font-size:21px;font-weight:700;margin:28px 0 16px;color:var(--ink)}
 
 .sensor-summary{padding:16px 20px;border:1px solid var(--line);border-radius:8px;background:var(--bg);margin:0 0 24px;font-size:14px;color:var(--muted)}.sensor-summary p:last-child{margin-bottom:0}#sensorSpecifications{max-width:900px}#sensorSpecifications h3{font-size:16px;color:var(--ink);margin-top:20px}#sensorSpecifications a{overflow-wrap:anywhere}
+
+.model-entry{display:flex;align-items:center;justify-content:space-between;gap:24px}.model-entry h2{margin-bottom:12px}.model-entry p:last-child{margin-bottom:0}.model-entry button{flex-shrink:0}#modelSetupShortcut{white-space:nowrap}@media(max-width:700px){.model-entry{align-items:stretch;flex-direction:column}.page-top>button{flex-grow:1}.model-entry button{align-self:flex-start}}

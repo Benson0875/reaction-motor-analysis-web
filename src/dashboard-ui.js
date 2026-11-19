@@ -7,7 +7,7 @@ for(const b of document.querySelectorAll('[data-task-tab]'))b.addEventListener('
 for(const b of document.querySelectorAll('[data-quality-jump]'))b.addEventListener('click',()=>{returnPanel=activePanel;showPanel('data');$('qualityDetails').open=true;$('qualityDetails').scrollIntoView({block:'start'});});
 $('qualityReturn').addEventListener('click',()=>showPanel(returnPanel));
 window.ReactionDashboard={update(c){
- window.ReactionTheme.refresh();$('batchInterpret').hidden=c.panel!=='charts';const en=c.english,tr=(z,e)=>en?e:z;
+ window.ReactionTheme.refresh();$('batchInterpret').hidden=c.panel!=='charts';$('modelSetupShortcut').hidden=!['charts','participants'].includes(c.panel);const en=c.english,tr=(z,e)=>en?e:z;
  $('workspaceLocation').textContent=tr('分析工作區','Analysis workspace');
  const p=$('participant'),s=$('session'),t=$('task');
  const selected=el=>el.options?.[el.selectedIndex]?.textContent||el.value;
