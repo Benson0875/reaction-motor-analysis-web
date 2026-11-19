@@ -61,7 +61,7 @@ function ask(event){
 function svg(group){
  const pairs=group.pairs;if(!pairs.length)return '<p>沒有可讀的完整配對。</p>';
  const values=pairs.flatMap(p=>[p.pre,p.post]).map(x=>x/group.scale),lo=Math.max(0,Math.min(...values)*.9),hi=Math.max(lo+1,...values)*1.1,y=v=>210-(v/group.scale-lo)/(hi-lo)*155;
- return '<svg viewBox="0 0 480 260" role="img" aria-label="各輪前後描述性時間圖"><path d="M60 40V210H430" fill="none" stroke="#86868b"/>'+[lo,(lo+hi)/2,hi].map(v=>'<text x="50" y="'+(210-(v-lo)/(hi-lo)*155+5)+'" text-anchor="end">'+v.toFixed(1)+'</text>').join('')+pairs.slice(0,80).map(p=>'<path d="M140 '+y(p.pre)+'L350 '+y(p.post)+'" stroke="#0071a4" opacity=".5" fill="none"/><circle cx="140" cy="'+y(p.pre)+'" r="4" fill="white" stroke="#0071a4"/><circle cx="350" cy="'+y(p.post)+'" r="4" fill="#0071a4"/>').join('')+'<text x="140" y="240" text-anchor="middle">前測</text><text x="350" y="240" text-anchor="middle">後測</text><text x="65" y="25">'+group.unit+'</text></svg>';
+ return '<svg viewBox="0 0 480 260" role="img" aria-label="各輪前後描述性時間圖"><path d="M60 40V210H430" fill="none" stroke="#86868b"/>'+[lo,(lo+hi)/2,hi].map(v=>'<text x="50" y="'+(210-(v-lo)/(hi-lo)*155+5)+'" text-anchor="end">'+v.toFixed(1)+'</text>').join('')+pairs.slice(0,80).map(p=>'<path d="M140 '+y(p.pre)+'L350 '+y(p.post)+'" stroke="#0071a4" opacity=".5" fill="none"/><circle cx="140" cy="'+y(p.pre)+'" r="4" fill="var(--paper)" stroke="#0071a4"/><circle cx="350" cy="'+y(p.post)+'" r="4" fill="#0071a4"/>').join('')+'<text x="140" y="240" text-anchor="middle">前測</text><text x="350" y="240" text-anchor="middle">後測</text><text x="65" y="25">'+group.unit+'</text></svg>';
 }
 function charts(){
  const el=$('descriptiveComparison');if(!el)return;el.replaceChildren();
