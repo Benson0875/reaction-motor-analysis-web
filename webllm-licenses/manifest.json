@@ -1,0 +1,27 @@
+[
+  {
+    "name": "@mlc-ai/web-llm",
+    "version": "0.2.89",
+    "license": "Apache-2.0"
+  },
+  {
+    "name": "@mlc-ai/web-runtime",
+    "version": "0.28.0-dev2",
+    "license": "Apache-2.0"
+  },
+  {
+    "name": "@mlc-ai/web-xgrammar",
+    "version": "0.1.27",
+    "license": "Apache-2.0"
+  },
+  {
+    "name": "@mlc-ai/web-tokenizers",
+    "version": "0.1.6",
+    "license": "Apache-2.0"
+  },
+  {
+    "name": "loglevel",
+    "version": "1.9.2",
+    "license": "MIT"
+  }
+]
