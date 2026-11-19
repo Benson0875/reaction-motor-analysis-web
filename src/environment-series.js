@@ -56,5 +56,17 @@ function latest(items){
  return result;
 }
 function rows(record){return record.samples.map(row=>({...Object.fromEntries(COLUMNS.map((c,i)=>[c,row[i]])),stage:STAGES[row[10]]}));}
-return {SCHEMA,COLUMNS,STAGES,validate,parse,latest,rows};
+// Describes observations in one selected interval; it is not a sensor accuracy estimate.
+function summarize(data,key,mask,start,end){
+ const selected=data.filter(r=>r.elapsed_ms>=start&&r.elapsed_ms<=end);
+ const valid=selected.filter(r=>Number.isFinite(r[key])&&!(r.quality_flags&mask));
+ const values=valid.map(r=>r[key]).sort((a,b)=>a-b),n=values.length;
+ const median=n?(n%2?values[(n-1)/2]:(values[n/2-1]+values[n/2])/2):null;
+ const mean=n?values.reduce((a,b)=>a+b,0)/n:null;
+ const sd=n>1?Math.sqrt(values.reduce((a,b)=>a+(b-mean)**2,0)/(n-1)):null;
+ const gaps=selected.slice(1).map((r,i)=>r.elapsed_ms-selected[i].elapsed_ms).sort((a,b)=>a-b);
+ const interval=gaps.length?(gaps.length%2?gaps[(gaps.length-1)/2]:(gaps[gaps.length/2-1]+gaps[gaps.length/2])/2):null;
+ return {total:selected.length,valid:n,excluded:selected.length-n,median,sd,min:n?values[0]:null,max:n?values[n-1]:null,interval_ms:interval,first_ms:selected[0]?.elapsed_ms??null,last_ms:selected.at(-1)?.elapsed_ms??null};
+}
+return {SCHEMA,COLUMNS,STAGES,validate,parse,latest,rows,summarize};
 });
