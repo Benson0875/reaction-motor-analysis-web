@@ -10,15 +10,16 @@ function controls(){
  $('assistantLoad').disabled=loading||ready;$('assistantModel').disabled=loading||ready;
  $('assistantStop').disabled=!worker&&!loading;$('assistantAsk').disabled=busy||loading||!context?.records.length;
  $('assistantProgress').hidden=!loading;
+ const en=document.documentElement.lang==='en';for(const b of document.querySelectorAll('[data-assistant-setup]'))b.textContent=loading?(en?'Preparing model…':'模型準備中…'):ready?(en?'Local AI settings':'本機AI設定'):(en?'Download local AI':'下載本機AI');
 }
 function resetEngine(note='模型已停止，數字摘要仍可查看。'){
  request++;clearTimeout(timeout);worker?.terminate();worker=null;ready=false;busy=false;loading=false;status.textContent=note;controls();
 }
 function open(button){
- opener=button;$('assistantMessages').replaceChildren();
- message(facts.observations.filter(x=>['scope','personal','comparison','peers','accuracy'].includes(x.topic)).slice(0,5).map(x=>x.text).join('\n\n')||'先匯入資料，再選擇測驗。');
+ const setup=button.hasAttribute('data-assistant-setup');opener=button;if(!setup)$('assistantMessages').replaceChildren();
+ if(!setup)message(facts.observations.filter(x=>['scope','personal','comparison','peers','accuracy'].includes(x.topic)).slice(0,5).map(x=>x.text).join('\n\n')||'先匯入資料，再選擇測驗。');
  if(!dialog.open){if(matchMedia('(max-width: 1159px)').matches)dialog.showModal();else{dialog.show();document.body.classList.add('assistant-open');}}
- $('assistantQuestion').focus();
+ const settings=document.querySelector('.assistant-setup');if(setup||!ready){settings.open=true;$('assistantModel').focus();}else $('assistantQuestion').focus();
 }
 function close(){dialog.close();document.body.classList.remove('assistant-open');opener?.focus();}
 function fallback(question){
@@ -76,7 +77,7 @@ function charts(){
  if(!facts.groups.length)el.textContent='匯入資料後顯示可讀的前後配對；未完成或損壞資料不補成0。';
 }
 window.ReactionAssistant={update(c){
- context=c;const next=JSON.stringify([c.panel,c.selected?.record.id,c.records.map(x=>[x.path,x.record.id,x.record.participant_id,x.record.session_id,x.metric,x.formalEligible]),c.model.failures,c.model.environment?.map(x=>[x.path,x.record.checkpoint,x.record.end_uptime_ms,x.record.sample_count])]);if(next===key)return;key=next;
+ context=c;controls();const next=JSON.stringify([c.panel,c.selected?.record.id,c.records.map(x=>[x.path,x.record.id,x.record.participant_id,x.record.session_id,x.metric,x.formalEligible]),c.model.failures,c.model.environment?.map(x=>[x.path,x.record.checkpoint,x.record.end_uptime_ms,x.record.sample_count])]);if(next===key)return;key=next;
  facts=F.build({records:c.records,allRecords:c.model.records,selected:c.panel==='participants'?c.selected:null,failures:c.model.failures.length,environment:(c.model.environment||[]).filter(x=>c.records.some(r=>window.ReactionAnalysis.sessionKey(r.record)===window.ReactionAnalysis.sessionKey(x.record)))});
  request++;if(busy){resetEngine('資料範圍已改變，舊回覆已停止。');}else if(!loading)clearTimeout(timeout);
  $('assistantMessages').replaceChildren();$('assistantQuestion').value='';$('assistantScope').textContent=c.panel==='participants'?'目前選取的測驗與同批參考':'目前篩選的資料';
