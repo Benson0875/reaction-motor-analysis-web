@@ -18,3 +18,5 @@ button{appearance:none;border:1px solid var(--line);border-radius:8px;background
 @media(min-width:1160px){.assistant-open .comparison-grid{grid-template-columns:1fr}}
 @media(max-width:1000px){.comparison-grid{grid-template-columns:1fr}}
 @media print{html[data-theme],:root{--warning-bg:#fff7ed;--amber:#9a3412;--soft:#eff6ff;--gauge-track:#dbeafe;--gauge-marker:#1d4ed8;--error:#b91c1c;--on-primary:#fff}}
+
+.usage-steps-title{font-size:21px;font-weight:700;margin:28px 0 16px;color:var(--ink)}
