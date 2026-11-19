@@ -38,8 +38,12 @@
       outcomes[t.outcome] = (outcomes[t.outcome] || 0) + 1;
       if (t.outcome === 'correct') correct.push(t.rt_ms);
     }
+    const sorted=correct.filter(Number.isFinite).sort((a,b)=>a-b);
+    const quantile=p=>{if(!sorted.length)return null;const i=(sorted.length-1)*p,lo=Math.floor(i),hi=Math.ceil(i);return sorted[lo]+(sorted[hi]-sorted[lo])*(i-lo);};
+    const q1=quantile(.25),q3=quantile(.75);
     return {algorithm:VERSION, unit:'ms', metric_ms:item.metric,
       median_ms:E.median(correct), correct:correct.length, total:r.trials.length,
+      q1_ms:q1, q3_ms:q3, iqr_ms:q1===null?null:q3-q1,
       accuracy_pct:100 * correct.length / r.trials.length, outcomes,
       extra_presses:r.trials.reduce((n,t) => n+t.extra_press_count,0),
       sufficient:item.metric !== null};
