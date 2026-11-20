@@ -66,19 +66,21 @@ function svg(group){
 }
 function charts(){
  const el=$('descriptiveComparison');if(!el)return;el.replaceChildren();
+ const en=!!context.english;
+ const labels={test_wait_skip_used:['本輪記錄有測試跳過','A test skip was recorded in this session'],post_delay_short:['活動後開始時間短於既有15秒門檻','Post-activity delay is below the existing 15-second threshold'],recovery_short:['恢復時間短於既有門檻','Recovery time is below the existing threshold'],activity_duration_deviation:['活動時間與既有門檻不同','Activity duration differs from the existing threshold']};
  for(const [i,g] of facts.groups.entries()){
   const article=document.createElement('article');article.className='descriptive-group';
-  const h=document.createElement('h3');h.textContent=g.name+' · 資料群 '+(i+1);article.append(h);
-  const p=document.createElement('p');p.className='note';p.textContent=g.pairs.length+'組配對／'+g.people+'人。每人多輪先平均，再彙整，此區含未通過嚴格門檻的描述性資料。';article.append(p);
+  const h=document.createElement('h3');h.textContent=(en?(g.task==='key'?'Button reaction game':'Wrist path'):g.task==='key'?'按鍵反應遊戲':'手腕連線')+(en?' · Group ':' · 資料群 ')+(i+1);article.append(h);
+  const p=document.createElement('p');p.className='note';p.textContent=en?`${g.pairs.length} readable pairs from ${g.people} people. Descriptive only, including records that do not pass strict checks. Repeated sessions are not independent people.`:`${g.pairs.length} 組可讀配對，來自 ${g.people} 人。這是描述性資料，包含未通過嚴格門檻的紀錄。同一人的多輪不是多位參與者。`;article.append(p);
   const graph=document.createElement('div');graph.innerHTML=svg(g);article.append(graph);
-  const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='查看配對數字與資格';details.append(summary);
-  for(const pair of g.pairs){const r=document.createElement('p');r.textContent=pair.label+': '+(pair.pre/g.scale).toFixed(1)+' → '+(pair.post/g.scale).toFixed(1)+' '+g.unit+'，差值 '+(pair.change/g.scale).toFixed(1)+(pair.accuracyChange!==null?'，正確率差 '+pair.accuracyChange.toFixed(1)+' 個百分點':'，錯序 '+pair.errorsPre+' → '+pair.errorsPost)+'，'+(pair.strict?'嚴格門檻通過':'僅供描述');details.append(r);}article.append(details);el.append(article);
+  const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent=en?'View values and eligibility reasons':'查看每輪數值與未通過原因';details.open=true;details.append(summary);
+  for(const pair of g.pairs){const r=document.createElement('p');const reasons=(pair.reasons||[]).map(code=>labels[code]?.[en?1:0]||code).join(en?', ':'、');r.textContent=pair.label+': '+(pair.pre/g.scale).toFixed(1)+' → '+(pair.post/g.scale).toFixed(1)+' '+g.unit+(en?', change ':'，差值 ')+(pair.change/g.scale).toFixed(1)+(pair.accuracyChange!==null?(en?', accuracy change ':'，正確率差 ')+pair.accuracyChange.toFixed(1)+(en?' percentage points':' 個百分點'):(en?', order errors ':'，錯序 ')+pair.errorsPre+' → '+pair.errorsPost)+(pair.strict?(en?' · Strict checks passed':'，嚴格門檻通過'):(en?' · Descriptive only':'，僅供描述')+(reasons?(en?' · Reasons: ':'，原因：')+reasons:(en?' · Review Data checks':'，請查看資料檢查')));details.append(r);}article.append(details);el.append(article);
  }
- if(!facts.groups.length)el.textContent='匯入資料後顯示可讀的前後配對，未完成或損壞資料不補成0。';
+ if(!facts.groups.length)el.textContent=en?'Import records to view readable pairs. Missing or damaged data are not replaced with zero.':'匯入資料後顯示可讀的前後配對，未完成或損壞資料不補成0。';
 }
 window.ReactionAssistant={update(c){
- context=c;controls();const next=JSON.stringify([c.panel,c.selected?.record.id,c.records.map(x=>[x.path,x.record.id,x.record.participant_id,x.record.session_id,x.metric,x.formalEligible]),c.model.failures,c.model.environment?.map(x=>[x.path,x.record.checkpoint,x.record.end_uptime_ms,x.record.sample_count])]);if(next===key)return;key=next;
- facts=F.build({records:c.records,allRecords:c.model.records,selected:c.panel==='participants'?c.selected:null,failures:c.model.failures.length,environment:(c.model.environment||[]).filter(x=>c.records.some(r=>window.ReactionAnalysis.sessionKey(r.record)===window.ReactionAnalysis.sessionKey(x.record)))});
+ context=c;controls();const next=JSON.stringify([c.panel,c.english,c.selected?.record.id,c.records.map(x=>[x.path,x.record.id,x.record.participant_id,x.record.session_id,x.metric,x.formalEligible]),c.model.failures,c.model.pairing?.excluded,c.model.strictExcluded,c.model.environment?.map(x=>[x.path,x.record.checkpoint,x.record.end_uptime_ms,x.record.sample_count])]);if(next===key)return;key=next;
+ facts=F.build({records:c.records,allRecords:c.model.records,selected:c.panel==='participants'?c.selected:null,failures:c.model.failures.length,exclusions:[...(c.model.pairing?.excluded||[]),...(c.model.strictExcluded||[])],environment:(c.model.environment||[]).filter(x=>c.records.some(r=>window.ReactionAnalysis.sessionKey(r.record)===window.ReactionAnalysis.sessionKey(x.record)))});
  request++;if(busy){resetEngine('資料範圍已改變，舊回覆已停止。');}else if(!loading)clearTimeout(timeout);
  $('assistantMessages').replaceChildren();$('assistantQuestion').value='';$('assistantScope').textContent=c.panel==='participants'?'目前選取的測驗與同批參考':'目前篩選的資料';
  const ul=$('assistantFacts');ul.replaceChildren();for(const o of facts.observations){const li=document.createElement('li');li.textContent='['+o.id+'] '+o.text;ul.append(li);}charts();controls();

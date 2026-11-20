@@ -4,7 +4,7 @@ const mean=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:null;
 const who=r=>[r.source,r.study_id,r.participant_id].join('|');
 const usable=x=>!x.cancelled&&x.crcValid===true&&x.record.status==='completed'&&Number.isFinite(x.metric);
 const fmt=(x,d=1)=>Number.isFinite(x)?x.toFixed(d):'—';
-function build({records=[],allRecords=records,selected=null,failures=0,environment=[]}={}){
+function build({records=[],allRecords=records,selected=null,failures=0,environment=[],exclusions=[]}={}){
  const people=new Set(records.map(x=>who(x.record))).size,groups=[],observations=[];
  const add=(topic,text)=>observations.push({id:'O'+(observations.length+1),topic,text});
  add('scope',`${records.length&&records.every(x=>x.record.source==='synthetic')?'合成示範，非人體結果。':''}目前選取 ${people} 位參與者、${records.length} 筆測驗，${records.filter(usable).length} 筆有可讀的完整時間。檔案讀取錯誤 ${failures} 筆。`);
@@ -14,7 +14,7 @@ function build({records=[],allRecords=records,selected=null,failures=0,environme
    const posts=rows.filter(x=>x.record.phase==='post'&&A.sessionKey(x.record)===A.sessionKey(pre.record));
    const pres=rows.filter(x=>x.record.phase==='pre'&&A.sessionKey(x.record)===A.sessionKey(pre.record));
    if(posts.length!==1||pres.length!==1)continue;const post=posts[0],c=A.compare(pre,post);if(!c.comparable)continue;
-   pairs.push({pre:pre.metric,post:post.metric,change:c.change_ms,accuracyChange:c.accuracy_change_pp,errorsPre:pre.summary.wrong??pre.summary.outcomes?.wrong??0,errorsPost:post.summary.wrong??post.summary.outcomes?.wrong??0,person:who(pre.record),label:pre.record.participant_id+' / '+pre.record.session_id,strict:c.formal_eligible});
+   pairs.push({pre:pre.metric,post:post.metric,change:c.change_ms,accuracyChange:c.accuracy_change_pp,errorsPre:pre.summary.wrong??pre.summary.outcomes?.wrong??0,errorsPost:post.summary.wrong??post.summary.outcomes?.wrong??0,person:who(pre.record),label:pre.record.participant_id+' / '+pre.record.session_id,participant:pre.record.participant_id,session:pre.record.session_id,task:pre.record.task,recoveryMs:post.record.recovery_rest_actual_ms??null,activityMs:Number.isInteger(post.record.activity_start_uptime_ms)&&Number.isInteger(post.record.activity_end_uptime_ms)?(post.record.activity_end_uptime_ms-post.record.activity_start_uptime_ms)>>>0:null,postDelayMs:Number.isInteger(post.record.activity_end_uptime_ms)&&Number.isInteger(post.record.task_start_uptime_ms)?(post.record.task_start_uptime_ms-post.record.activity_end_uptime_ms)>>>0:null,strict:c.formal_eligible,reasons:[...new Set([...exclusions.filter(x=>x.key===A.sessionKey(pre.record)+'|'+pre.record.task).flatMap(x=>x.reasons||[]),...pre.quality,...post.quality,...(Number.isInteger(post.record.activity_end_uptime_ms)&&Number.isInteger(post.record.task_start_uptime_ms)&&((post.record.task_start_uptime_ms-post.record.activity_end_uptime_ms)>>>0)<15000?['post_delay_short']:[])])]});
   }
   const perPerson=new Map();for(const p of pairs){if(!perPerson.has(p.person))perPerson.set(p.person,[]);perPerson.get(p.person).push(p.change);}
   const changes=[...perPerson.values()].map(mean),task=rows[0].record.task,scale=task==='wrist'?1000:1,unit=task==='wrist'?'s':'ms',name=task==='wrist'?'手腕':'方向鍵';
@@ -45,5 +45,11 @@ function select(text,facts){let o;try{o=JSON.parse(text);}catch{throw Error('Inv
  if(!o||Object.keys(o).join(',')!=='observation_ids'||!Array.isArray(o.observation_ids)||o.observation_ids.length<1||o.observation_ids.length>4)throw Error('Invalid format');
  const ids=[...new Set(o.observation_ids)];const result=ids.map(id=>facts.payload.observations.find(x=>x.id===id));if(result.some(x=>!x))throw Error('Invalid reference');return result;
 }
-return {build,select};
+function descriptiveCSV(facts){
+ const quote=v=>'"'+String(v??'').replaceAll('"','""')+'"';
+ const rows=[['participant','session','task','pre_ms','post_ms','change_ms','accuracy_change_pp','activity_ms','post_delay_ms','recovery_ms','strict_eligible','quality_reasons']];
+ for(const g of facts.groups)for(const p of g.pairs)rows.push([p.participant,p.session,p.task,p.pre,p.post,p.change,p.accuracyChange,p.activityMs,p.postDelayMs,p.recoveryMs,p.strict,p.reasons.join(' | ')]);
+ return rows.map(r=>r.map(quote).join(',')).join('\r\n');
+}
+return {build,select,descriptiveCSV};
 });

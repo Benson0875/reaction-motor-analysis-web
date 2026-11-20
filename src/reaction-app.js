@@ -27,7 +27,7 @@ function applyPanels(){
   $('modeCharts').setAttribute?.('aria-pressed',detailMode==='charts'?'true':'false');
   $('modeDetails').setAttribute?.('aria-pressed',detailMode==='details'?'true':'false');
   window.ReactionDashboard?.update({model,records:filtered(),panel:activePanel,english,filterNotice});
-  window.ReactionAssistant?.update({model,records:filtered(),selected:$('recordSelect').value!==''?model.records[Number($('recordSelect').value)]:null,panel:activePanel});
+  window.ReactionAssistant?.update({model,records:filtered(),selected:$('recordSelect').value!==''?model.records[Number($('recordSelect').value)]:null,panel:activePanel,english});
 }
 function showPanel(name){if(!Object.hasOwn(panelNames(),name))return;activePanel=name;applyPanels();if(name!=='overview')$('panelHeading').focus?.();}
 function selectRecord(index){$('recordSelect').value=index;detail();showPanel('participants');$('individual').scrollIntoView({behavior:'auto'});}
@@ -269,7 +269,7 @@ function render(){
     const independent=E.independent(rows),est=E.estimate(independent.included.map(x=>x.change)),scale=rows[0].task==='wrist'?1000:1,unit=scale===1000?'s':'ms';
     html+=`<section class="card"><h2>${rows[0].task==='key'?tr('按鍵反應遊戲：前後測','Button reaction game: pre and post'):tr('手腕連線：前後測','Wrist path: pre and post')}</h2><span class="tag">${rows[0].slots.pre.record.source==='synthetic'?tr('合成示範，非受試者結果','Synthetic example, not participant results'):tr('匯入資料','Imported data')}</span><p>${tr('有效配對','Pairs')}: ${rows.length} · ${tr('獨立參與者','Independent IDs')}: ${est.n}</p><div class="comparison-grid">${pairedGraph(rows)}${rows[0].task==='key'?accuracyGraph(rows):''}</div><details><summary>${tr('查看差值與統計細節','Change and statistical details')}</summary><p class="note">${esc(key.split('|').join(' / '))}</p>${changeGraph(rows,est)}<p>${tr('平均變化','Mean change')}: ${number(est.mean===null?null:est.mean/scale,2)} ${unit} · ${tr('描述性95% t區間','Descriptive 95% t interval')}: ${est.ci?est.ci.map(v=>number(v/scale,2)).join(' to '):tr('人數不足','Insufficient IDs')}</p></details><details class="pair-details"><summary>${tr('查看配對數字','Inspect paired values')}</summary><div class="scroll"><table><tr><th>ID / Session</th><th>Pre ${unit}</th><th>Post ${unit}</th><th>Δ ${unit}</th><th>Correct pre→post</th><th>Accuracy Δ pp</th></tr>${rows.map(r=>`<tr><td>${esc(r.participant+' / '+r.session)}</td><td>${number(r.pre/scale)}</td><td>${number(r.post/scale)}</td><td>${number(r.change/scale)}</td><td>${r.correctPre} → ${r.correctPost}</td><td>${number(r.accuracyChangePP,3)}</td></tr>`).join('')}</table></div></details>${independent.excluded.map(x=>`<p class="warning">${esc(x.key)}: ${esc(x.reason)}</p>`).join('')}</section>`;
   }
-  $('analysis').innerHTML=html||`<section class="card"><h2>${tr('整體分析','Overall analysis')}</h2><p>${tr('目前沒有通過品質門檻的完整配對。請到「個人結果」查看已匯入的測驗。','No complete pairs pass the quality gate. Open Results to inspect imported records.')}</p></section>`;
+  $('analysis').innerHTML=html||`<section class="card"><h2>${tr('整體分析','Overall analysis')}</h2><p>${tr('目前沒有通過嚴格品質門檻的前後測配對。下方「每輪前後數據」可查看可讀的描述性資料與原因。','No pre/post pairs pass the strict quality checks. See each session below for descriptive results and reasons.')}</p></section>`;
   const old=$('recordSelect').value;
   $('recordSelect').innerHTML=records.map(x=>{const i=model.records.indexOf(x),r=x.record;return `<option value="${i}" data-stage="${r.stage_id}">${esc(($('participant').value==='all'?r.participant_id+' · ':'')+r.session_id+' · '+stageLabel(r.stage_id))}</option>`;}).join('');
   if(records.some(x=>String(model.records.indexOf(x))===old))$('recordSelect').value=old;
@@ -379,6 +379,10 @@ $('cancelRemoval').addEventListener('click',closeRemoval);
 for(const [id,checked] of [['selectAllRemoval',true],['selectNoneRemoval',false]])$(id).addEventListener('click',()=>{$('removalChoices').querySelectorAll('[data-remove-choice]').forEach(n=>n.checked=checked);updateRemovalCount();});$('exitDemo').addEventListener('click',clearPage);
 for(const [id,mode] of [['modeCharts','charts'],['modeDetails','details']])$(id).addEventListener('click',()=>{detailMode=mode;applyPanels();});
 document.querySelectorAll('[data-nav]').forEach(b=>b.addEventListener('click',()=>showPanel(b.dataset.nav)));
+$('descriptiveExport').addEventListener('click',()=>{
+  const facts=window.AssistantFacts.build({records:model.records,exclusions:[...model.pairing.excluded,...model.strictExcluded]});
+  download('all-readable-pairs-descriptive.csv','\ufeff'+window.AssistantFacts.descriptiveCSV(facts));
+});
 $('export').addEventListener('click',()=>{
   const rows=[['algorithm','source','participant','session','task','pre_ms','post_ms','change_ms','accuracy_change_pp'],...model.formal.map(r=>[A.VERSION,r.source,r.participant,r.session,r.task,r.pre,r.post,r.change,r.accuracyChangePP??''])];
   download('strict-pairs.csv','\ufeff'+rows.map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\r\n'));
