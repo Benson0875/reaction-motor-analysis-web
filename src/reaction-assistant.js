@@ -30,7 +30,7 @@ function answer(items,label){message(label+'\n'+items.map(x=>'['+x.id+'] '+x.tex
 async function load(){
  if(worker||loading)return;
  if(location.protocol==='file:'){status.textContent='本機模型請在HTTPS網站或localhost開啟。直接開HTML仍可看圖表與固定摘要。';return;}
- if(!window.isSecureContext||!navigator.gpu){status.textContent='此瀏覽器不支援WebGPU。請改用支援的Chrome／Edge；數字摘要仍可用。';return;}
+ if(!window.isSecureContext||!navigator.gpu){status.textContent='此瀏覽器不支援WebGPU。請改用支援的Chrome／Edge，數字摘要仍可用。';return;}
  loading=true;controls();status.textContent='正在檢查GPU…';
  try{
   const adapter=await navigator.gpu.requestAdapter();if(!adapter)throw Error('找不到可用GPU');if(!loading)return;
@@ -69,12 +69,12 @@ function charts(){
  for(const [i,g] of facts.groups.entries()){
   const article=document.createElement('article');article.className='descriptive-group';
   const h=document.createElement('h3');h.textContent=g.name+' · 資料群 '+(i+1);article.append(h);
-  const p=document.createElement('p');p.className='note';p.textContent=g.pairs.length+'組配對／'+g.people+'人。每人多輪先平均，再彙整；此區含未通過嚴格門檻的描述性資料。';article.append(p);
+  const p=document.createElement('p');p.className='note';p.textContent=g.pairs.length+'組配對／'+g.people+'人。每人多輪先平均，再彙整，此區含未通過嚴格門檻的描述性資料。';article.append(p);
   const graph=document.createElement('div');graph.innerHTML=svg(g);article.append(graph);
   const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='查看配對數字與資格';details.append(summary);
-  for(const pair of g.pairs){const r=document.createElement('p');r.textContent=pair.label+': '+(pair.pre/g.scale).toFixed(1)+' → '+(pair.post/g.scale).toFixed(1)+' '+g.unit+'；差值 '+(pair.change/g.scale).toFixed(1)+(pair.accuracyChange!==null?'；正確率差 '+pair.accuracyChange.toFixed(1)+' 個百分點':'；錯序 '+pair.errorsPre+' → '+pair.errorsPost)+'；'+(pair.strict?'嚴格門檻通過':'僅供描述');details.append(r);}article.append(details);el.append(article);
+  for(const pair of g.pairs){const r=document.createElement('p');r.textContent=pair.label+': '+(pair.pre/g.scale).toFixed(1)+' → '+(pair.post/g.scale).toFixed(1)+' '+g.unit+'，差值 '+(pair.change/g.scale).toFixed(1)+(pair.accuracyChange!==null?'，正確率差 '+pair.accuracyChange.toFixed(1)+' 個百分點':'，錯序 '+pair.errorsPre+' → '+pair.errorsPost)+'，'+(pair.strict?'嚴格門檻通過':'僅供描述');details.append(r);}article.append(details);el.append(article);
  }
- if(!facts.groups.length)el.textContent='匯入資料後顯示可讀的前後配對；未完成或損壞資料不補成0。';
+ if(!facts.groups.length)el.textContent='匯入資料後顯示可讀的前後配對，未完成或損壞資料不補成0。';
 }
 window.ReactionAssistant={update(c){
  context=c;controls();const next=JSON.stringify([c.panel,c.selected?.record.id,c.records.map(x=>[x.path,x.record.id,x.record.participant_id,x.record.session_id,x.metric,x.formalEligible]),c.model.failures,c.model.environment?.map(x=>[x.path,x.record.checkpoint,x.record.end_uptime_ms,x.record.sample_count])]);if(next===key)return;key=next;
@@ -89,7 +89,7 @@ $('assistantLoad').addEventListener('click',load);$('assistantStop').addEventLis
 for(const b of document.querySelectorAll('[data-assistant-question]'))b.addEventListener('click',()=>{$('assistantQuestion').value=b.dataset.assistantQuestion;ask(new Event('submit'));});
 $('assistantClear').addEventListener('click',()=>{request++;if(busy)resetEngine();$('assistantMessages').replaceChildren();$('assistantQuestion').value='';});
 $('assistantExport').addEventListener('click',()=>{
- const content='資料摘要 · '+facts.payload.version+'\n'+facts.observations.map(x=>'['+x.id+'] '+x.text).join('\n\n')+'\n\n模型用途：挑選相關觀察，顯示數字來自程式核對；不能作臨床診斷或運動因果結論。';
+ const content='資料摘要 · '+facts.payload.version+'\n'+facts.observations.map(x=>'['+x.id+'] '+x.text).join('\n\n')+'\n\n模型用途：挑選相關觀察，顯示數字來自程式核對，不能作臨床診斷或運動因果結論。';
  const url=URL.createObjectURL(new Blob(['\ufeff'+content],{type:'text/plain;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='measurement-summary.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
 controls();
