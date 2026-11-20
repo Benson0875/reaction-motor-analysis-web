@@ -18,7 +18,8 @@ window.ReactionDashboard={update(c){
  for(const b of document.querySelectorAll('[data-mobile-nav]'))b.setAttribute('aria-current',b.dataset.mobileNav===c.panel?'page':'false');
  const records=c.records,people=new Set(records.map(x=>[x.record.source,x.record.study_id,x.record.participant_id].join('|'))).size;
  const allowed=new Set(records.map(x=>window.ReactionAnalysis.sessionKey(x.record)+'|'+x.record.task));
- const summaries=[[people,tr('篩選人數','Selected IDs')],[c.model.formal.filter(x=>allowed.has(x.key)).length,tr('嚴格配對','Strict pairs')],[records.filter(x=>!x.formalEligible).length,tr('僅供檢視的測驗','Inspection-only tasks')]];
+ const descriptive=window.AssistantFacts.build({records,exclusions:[...(c.model.pairing?.excluded||[]),...(c.model.strictExcluded||[])]});
+ const summaries=[[people,tr('篩選人數','Selected IDs')],[descriptive.groups.reduce((n,g)=>n+g.pairs.length,0),tr('可讀前後配對','Readable pre/post pairs')],[records.length,tr('已匯入測驗','Imported tasks')]];
  $('comparisonSummary').replaceChildren();for(const [value,label] of summaries){const card=document.createElement('div');card.className='metric';const strong=document.createElement('strong');strong.textContent=String(value);const span=document.createElement('span');span.textContent=label;card.append(strong,span);$('comparisonSummary').append(card);}
  $('resultScope').textContent=tr(`目前篩選：${people}位參與者、${records.length}筆測驗。`,`Current selection: ${people} participant IDs, ${records.length} task records.`);
  $('filterNotice').textContent=c.filterNotice||'';$('filterNotice').hidden=!c.filterNotice;
