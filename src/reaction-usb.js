@@ -88,7 +88,7 @@
       check(action==='PING'||action==='SYNC','Unsupported USB action');
       this.id=this.id%2147483647+1;const id=this.id;
       return new Promise((resolve,reject)=>{
-        const timer=setTimeout(()=>this.settle(Error(action==='PING'?'Waiting for idle device / USB firmware':'USB snapshot timeout'),undefined,id),timeout||(action==='PING'?2500:125000));
+        const timer=setTimeout(()=>this.settle(Error(action==='PING'?'Waiting for idle device / USB firmware':'USB snapshot timeout'),undefined,id),timeout||(action==='PING'?2500:605000));
         this.pending={id,action,resolve,reject,timer,snapshot:action==='SYNC'?new SnapshotDecoder(id):null};
         this.writer.write(new TextEncoder().encode(`@USB1 ${action} ${id}\n`)).catch(e=>this.settle(e,undefined,id));
       });
