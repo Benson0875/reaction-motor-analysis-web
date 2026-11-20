@@ -71,7 +71,23 @@ function charts(){
   const article=document.createElement('article');article.className='descriptive-group';
   const h=document.createElement('h3');h.textContent=(en?(g.task==='key'?'Button reaction game':'Wrist path'):g.task==='key'?'按鍵反應遊戲':'手腕連線')+(en?' · Group ':' · 資料群 ')+(i+1);article.append(h);
   const p=document.createElement('p');p.className='note';p.textContent=en?`${g.pairs.length} readable pairs from ${g.people} people. Descriptive only, including records that do not pass strict checks. Repeated sessions are not independent people.`:`${g.pairs.length} 組可讀配對，來自 ${g.people} 人。這是描述性資料，包含未通過嚴格門檻的紀錄。同一人的多輪不是多位參與者。`;article.append(p);
-  const graph=document.createElement('div');graph.innerHTML=svg(g);article.append(graph);
+  const graph=document.createElement('div'),change=document.createElement('div'),secondary=document.createElement('div');
+  const refreshGraphs=identify=>{graph.innerHTML=window.PosterComparison.svg(g,'time',en,identify);change.innerHTML=window.PosterComparison.svg(g,'delta',en,identify);secondary.innerHTML=window.PosterComparison.svg(g,g.task==='key'?'accuracy':'errors',en,identify);};
+  refreshGraphs(false);article.append(graph,change,secondary);
+  const exportBox=document.createElement('div');exportBox.className='actions';
+  const identify=document.createElement('input');identify.type='checkbox';identify.id='poster-identify-'+i;
+  identify.addEventListener('change',()=>refreshGraphs(identify.checked));
+  const identifyLabel=document.createElement('label');identifyLabel.htmlFor=identify.id;identifyLabel.append(identify,document.createTextNode(en?' Show and export participant and session IDs':' 圖表及匯出加入參與者與輪次編號'));exportBox.append(identifyLabel);
+  const save=(name,blob)=>{const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);};
+  const button=(label,handler)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.addEventListener('click',handler);exportBox.append(b);};
+  button(en?'Download data CSV':'下載圖表資料 CSV',()=>save('comparison-data.csv',new Blob(['\ufeff',window.PosterComparison.csv(g,identify.checked)],{type:'text/csv;charset=utf-8'})));
+  for(const kind of ['time','delta',g.task==='key'?'accuracy':'errors']){
+   const name=kind==='time'?(en?'Time':'時間'):kind==='delta'?(en?'Change':'差值'):kind==='accuracy'?(en?'Accuracy':'正確率'):(en?'Errors':'錯序');
+   const make=()=>window.PosterComparison.svg(g,kind,en,identify.checked);
+   button(name+' SVG',()=>save('comparison-'+kind+'.svg',new Blob([make()],{type:'image/svg+xml;charset=utf-8'})));
+   button(name+' PNG',()=>{const reader=new FileReader(),img=new Image();reader.onload=()=>{img.src=reader.result;};img.onload=()=>{const canvas=document.createElement('canvas');canvas.width=2400;canvas.height=1440;canvas.getContext('2d').drawImage(img,0,0,2400,1440);canvas.toBlob(blob=>{if(blob)save('comparison-'+kind+'.png',blob);},'image/png');};reader.readAsDataURL(new Blob([make()],{type:'image/svg+xml;charset=utf-8'}));});
+  }
+  article.append(exportBox);
   const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent=en?'View each session’s values':'查看每輪前後數值';details.open=true;details.append(summary);
   for(const pair of g.pairs){const r=document.createElement('p');r.textContent=pair.label+': '+(pair.pre/g.scale).toFixed(1)+' → '+(pair.post/g.scale).toFixed(1)+' '+g.unit+(en?', change ':'，差值 ')+(pair.change/g.scale).toFixed(1)+(pair.accuracyChange!==null?(en?', accuracy change ':'，正確率差 ')+pair.accuracyChange.toFixed(1)+(en?' percentage points':' 個百分點'):(en?', order errors ':'，錯序 ')+pair.errorsPre+' → '+pair.errorsPost);details.append(r);}article.append(details);el.append(article);
  }

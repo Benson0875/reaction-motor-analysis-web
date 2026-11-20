@@ -4,7 +4,7 @@ import hashlib, base64, re
 r = Path(__file__).resolve().parents[1] / 'src'
 s = (r / 'reaction-index.html').read_text()
 styles = [(r / n).read_text() for n in ['style.css', 'reaction.css', 'dashboard.css']]
-names = ['dashboard-theme.js', 'sequential-core.js', 'reaction-demo.js', 'environment-series.js', 'reaction-analysis.js', 'reaction-import.js', 'reaction-usb.js', 'assistant-facts.js', 'reaction-assistant.js', 'reaction-app.js', 'dashboard-ui.js']
+names = ['dashboard-theme.js', 'sequential-core.js', 'reaction-demo.js', 'environment-series.js', 'reaction-analysis.js', 'reaction-import.js', 'reaction-usb.js', 'assistant-facts.js', 'poster-comparison.js', 'reaction-assistant.js', 'reaction-app.js', 'dashboard-ui.js']
 scripts = [(r / n).read_text() for n in names]
 for name, code in zip(['style.css', 'reaction.css', 'dashboard.css'], styles):
     s = s.replace(f'<link rel="stylesheet" href="{name}">', '<style>' + code + '</style>')
