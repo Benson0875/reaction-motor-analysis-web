@@ -306,7 +306,7 @@ function scheduleUsb(){
 async function syncUsb(){
   if(!usb||usbBusy)return;
   const connection=usb,tag=generation;usbBusy=true;usbButtons();
-  $('usbStatus').textContent=tr('檢查裝置並同步中…','Checking device and synchronizing…');
+  $('usbStatus').textContent=tr('正在讀取 SD 卡所有輪次。資料較多時需要數分鐘，請勿拔線。','Reading all sessions from the SD card. Large imports may take several minutes. Keep USB connected.');
   try{
     const entries=await connection.snapshot();
     if(connection!==usb||tag!==generation)return;
@@ -322,7 +322,7 @@ async function syncUsb(){
       if(e.usbAction==='SYNC'||e.message==='cancelled')pauseUsb();
       if(connection.closed){await connection.close();if(connection===usb)usb=null;}
     }
-  }finally{usbBusy=false;usbButtons();scheduleUsb();}
+  }finally{usbBusy=false;usbButtons();}
 }
 async function connectUsb(){
   if(usb||usbConnecting)return;
@@ -336,7 +336,7 @@ async function connectUsb(){
     next.onAvailability=ready=>{
       if(usb!==next)return;
       if(!ready&&!usbBusy&&$('usbAuto').checked)$('usbStatus').textContent=tr('裝置忙碌，已停止自動輪詢，等候完成通知。','Device busy. Auto polling paused until an idle notification.');
-      scheduleUsb();
+      if(!usbBusy)scheduleUsb();
     };
     $('usbAuto').checked=true;usbButtons();await syncUsb();
   }catch(e){

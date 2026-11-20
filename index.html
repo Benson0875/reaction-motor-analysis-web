@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval' 'sha256-IrTe1TKr8wn4pdQqotQmmBfFkk+OB8slu1MmNiqT6Wk=' 'sha256-VqytvtIoAyRJTnNJdOaoB2bJtCw+jOvpb85Q43k0lEo=' 'sha256-Ro5vpL/KBvfGMD+cd6wXLJADBrBReYqRkrCGhz8sHXc=' 'sha256-jkRjdTG70NdUBMf9wPENYPAcPxflzxND70nCv2tA8d8=' 'sha256-eG1029awyohQXX0DfQmqW6wofjmNQAY/RDgvh4nVgU8=' 'sha256-R9zv32WME71Id0d1nALQG3Oor9HQA54crIMxDvbjQ2I=' 'sha256-jjYwyV402aAWl3jWp1g2BpRhNJhGtm5Rl/sTQfzd3Y8=' 'sha256-Tk6bwjGU9QS9qLHCqu955qz8NjjeTgic/gXdft08etU=' 'sha256-8fUGV8SyLBuQA4SObdR71Fs2iGe+sGStTQ2GfAKt8NI=' 'sha256-gQ+v9rJiJeM2AihZ/aRB4zCrP2c3Yy1eoDk0KDf2V00=' 'sha256-w3jRmRiw84KI4TBg8ae/nYeRqGBeEb2f6gnbTL5LVnA='; style-src 'sha256-pApkgrH6Yx/qbJccewE5T/fIpmU/bESjDPtiZ2gPuQA=' 'sha256-O/US6knGwGPgKqVYVgic0yjOg8dikUvAYkbk2Q35hio=' 'sha256-q6m/pCaRp3calE5qCBUWxJiJ5bhcUttdsCQGLPmBcxE='; img-src data:; connect-src 'self' https://huggingface.co https://*.huggingface.co https://*.hf.co https://raw.githubusercontent.com; worker-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval' 'sha256-IrTe1TKr8wn4pdQqotQmmBfFkk+OB8slu1MmNiqT6Wk=' 'sha256-pcPa82h+ghfE0ujPlMP+BcI6B+e5DYLswCIhs3wvKyE=' 'sha256-Ro5vpL/KBvfGMD+cd6wXLJADBrBReYqRkrCGhz8sHXc=' 'sha256-jkRjdTG70NdUBMf9wPENYPAcPxflzxND70nCv2tA8d8=' 'sha256-eG1029awyohQXX0DfQmqW6wofjmNQAY/RDgvh4nVgU8=' 'sha256-R9zv32WME71Id0d1nALQG3Oor9HQA54crIMxDvbjQ2I=' 'sha256-lFKA4cmO9d095G/9XP2trzZw5Yd+lYZYKXoNPnomoH0=' 'sha256-Tk6bwjGU9QS9qLHCqu955qz8NjjeTgic/gXdft08etU=' 'sha256-8fUGV8SyLBuQA4SObdR71Fs2iGe+sGStTQ2GfAKt8NI=' 'sha256-OwTvsiHDYlyrylimxgvQ1kjm6IhaU6r2E/hugMSkqWw=' 'sha256-w3jRmRiw84KI4TBg8ae/nYeRqGBeEb2f6gnbTL5LVnA='; style-src 'sha256-pApkgrH6Yx/qbJccewE5T/fIpmU/bESjDPtiZ2gPuQA=' 'sha256-O/US6knGwGPgKqVYVgic0yjOg8dikUvAYkbk2Q35hio=' 'sha256-q6m/pCaRp3calE5qCBUWxJiJ5bhcUttdsCQGLPmBcxE='; img-src data:; connect-src 'self' https://huggingface.co https://*.huggingface.co https://*.hf.co https://raw.githubusercontent.com; worker-src 'self'; base-uri 'none'; form-action 'none'">
 <script>(function(){'use strict';const key='reaction-dashboard-theme';let current='light';try{if(localStorage.getItem(key)==='dark')current='dark';}catch{}
 function apply(theme){current=theme==='dark'?'dark':'light';document.documentElement.dataset.theme=current;document.documentElement.style.colorScheme=current;refresh();}
 function refresh(){const b=document.getElementById('themeToggle');if(!b)return;const en=document.documentElement.lang==='en';b.textContent=current==='dark'?(en?'Light theme':'切換淺色'):(en?'Dark theme':'切換深色');b.setAttribute('aria-label',b.textContent);b.setAttribute('aria-pressed',String(current==='dark'));}
@@ -168,9 +168,9 @@ function immediateKeys(r,quality){
  return {correct:times.length,errors:wrong,metric};
 }
 function validate(r){assert(r&&r.schema===SCHEMA,'Unsupported schema: old B25 stays separate');assert(Object.hasOwn(PROTOCOL,r.task)&&(r.protocol_id===PROTOCOL[r.task]||r.task==='key'&&[IMMEDIATE_KEY,PRESS_KEY].includes(r.protocol_id)||r.task==='wrist'&&r.protocol_id==='wrist-alternating-13-dwell1000-v2'),'Unsupported task protocol');
- if(r.timing_context_id!==undefined)assert(['env-worker-1hz-v1','prepost-snapshots-v1'].includes(r.timing_context_id),'Unsupported timing context');
+ if(r.timing_context_id!==undefined)assert(['env-worker-1hz-v1','prepost-snapshots-v1','env-worker-1hz-audio-pwm-v2'].includes(r.timing_context_id),'Unsupported timing context');
  for(const k of ['id','boot_id','study_id','participant_id'])assert(typeof r[k]==='string'&&/^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$/.test(r[k]),'Invalid '+k);
- assert(['device','synthetic'].includes(r.source),'Invalid source');assert(typeof r.session_id==='string'&&/^S[0-9]{4}$/.test(r.session_id),'Invalid session ID');assert(['ecochi-sequential-two-bouts-v1','ecochi-sequential-two-bouts-no-baseline-v2'].includes(r.protocol_id_study),'Unsupported study protocol');assert(['pre','post'].includes(r.phase),'Invalid phase');const expectedStage=(r.task==='wrist'?'WRIST_':'KEY_')+r.phase.toUpperCase();assert(r.stage_id===expectedStage,'Stage mismatch');assert(r.bout_id===(r.task==='wrist'?1:2),'Bout mismatch');assert(r.block_number===(r.task==='wrist'?(r.phase==='pre'?1:2):(r.phase==='pre'?3:4)),'Block number mismatch');assert(typeof r.form_pair_id==='string'&&typeof r.form_id==='string'&&/^[0-9a-f]{8}$/.test(r.form_id),'Missing form identity');assert(Number.isInteger(r.age_years)&&r.age_years>=18&&r.age_years<=110,'Invalid adult age');assert(['zh-TW','en'].includes(r.locale)&&[0,1,2].includes(r.volume),'Invalid operation config');assert(['skipped','partial','completed'].includes(r.practice),'Invalid practice status');
+ assert(['device','synthetic'].includes(r.source),'Invalid source');assert(typeof r.session_id==='string'&&/^S[0-9]{4}$/.test(r.session_id),'Invalid session ID');assert(['ecochi-sequential-two-bouts-v1','ecochi-sequential-two-bouts-no-baseline-v2'].includes(r.protocol_id_study),'Unsupported study protocol');assert(['pre','post'].includes(r.phase),'Invalid phase');const expectedStage=(r.task==='wrist'?'WRIST_':'KEY_')+r.phase.toUpperCase();assert(r.stage_id===expectedStage,'Stage mismatch');assert(r.bout_id===(r.task==='wrist'?1:2),'Bout mismatch');assert(r.block_number===(r.task==='wrist'?(r.phase==='pre'?1:2):(r.phase==='pre'?3:4)),'Block number mismatch');assert(typeof r.form_pair_id==='string'&&typeof r.form_id==='string'&&/^[0-9a-f]{8}$/.test(r.form_id),'Missing form identity');assert(Number.isInteger(r.age_years)&&r.age_years>=18&&r.age_years<=110,'Invalid adult age');assert(['zh-TW','en'].includes(r.locale)&&(r.timing_context_id==='env-worker-1hz-audio-pwm-v2'?[0,1,2,3,4,5]:[0,1,2]).includes(r.volume),'Invalid operation config');assert(['skipped','partial','completed'].includes(r.practice),'Invalid practice status');
  for(const k of ['task_start_uptime_ms','task_end_uptime_ms'])assert(integer(r[k]),'Invalid task timestamp');assert(['completed','timeout','aborted','invalid','active'].includes(r.status),'Invalid status');
  for(const e of [r.environment_pre,r.environment_post]){assert(e&&integer(e.uptime_ms),'Missing environment');for(const k of ['temperature_c','humidity_pct','mq_filtered_adc','mq_baseline_adc','mq_relative_pct'])assert(e[k]===null||Number.isFinite(e[k]),'Invalid environmental value');assert(e.temperature_c===null||(e.temperature_c>=-40&&e.temperature_c<=85),'Temperature range');assert(e.humidity_pct===null||(e.humidity_pct>=0&&e.humidity_pct<=100),'RH range');assert(integer(e.mq_raw_adc)&&e.mq_raw_adc<=4095,'MQ ADC range');assert(typeof e.mq_ready==='boolean','MQ quality');if(e.mq_ready)assert(e.mq_baseline_adc>10&&e.mq_filtered_adc!==null&&Math.abs((e.mq_filtered_adc-e.mq_baseline_adc)*100/e.mq_baseline_adc-e.mq_relative_pct)<.02,'MQ baseline mismatch');else assert(e.mq_relative_pct===null,'Unready MQ relative value');}
  for(const k of ['activity_start_uptime_ms','activity_end_uptime_ms'])assert(r[k]===null||integer(r[k]),'Invalid activity timestamp');
@@ -531,7 +531,7 @@ return {SCHEMA,COLUMNS,STAGES,validate,parse,latest,rows,summarize};
       check(action==='PING'||action==='SYNC','Unsupported USB action');
       this.id=this.id%2147483647+1;const id=this.id;
       return new Promise((resolve,reject)=>{
-        const timer=setTimeout(()=>this.settle(Error(action==='PING'?'Waiting for idle device / USB firmware':'USB snapshot timeout'),undefined,id),timeout||(action==='PING'?2500:125000));
+        const timer=setTimeout(()=>this.settle(Error(action==='PING'?'Waiting for idle device / USB firmware':'USB snapshot timeout'),undefined,id),timeout||(action==='PING'?2500:605000));
         this.pending={id,action,resolve,reject,timer,snapshot:action==='SYNC'?new SnapshotDecoder(id):null};
         this.writer.write(new TextEncoder().encode(`@USB1 ${action} ${id}\n`)).catch(e=>this.settle(e,undefined,id));
       });
@@ -1002,7 +1002,7 @@ function scheduleUsb(){
 async function syncUsb(){
   if(!usb||usbBusy)return;
   const connection=usb,tag=generation;usbBusy=true;usbButtons();
-  $('usbStatus').textContent=tr('檢查裝置並同步中…','Checking device and synchronizing…');
+  $('usbStatus').textContent=tr('正在讀取 SD 卡所有輪次。資料較多時需要數分鐘，請勿拔線。','Reading all sessions from the SD card. Large imports may take several minutes. Keep USB connected.');
   try{
     const entries=await connection.snapshot();
     if(connection!==usb||tag!==generation)return;
@@ -1018,7 +1018,7 @@ async function syncUsb(){
       if(e.usbAction==='SYNC'||e.message==='cancelled')pauseUsb();
       if(connection.closed){await connection.close();if(connection===usb)usb=null;}
     }
-  }finally{usbBusy=false;usbButtons();scheduleUsb();}
+  }finally{usbBusy=false;usbButtons();}
 }
 async function connectUsb(){
   if(usb||usbConnecting)return;
@@ -1032,7 +1032,7 @@ async function connectUsb(){
     next.onAvailability=ready=>{
       if(usb!==next)return;
       if(!ready&&!usbBusy&&$('usbAuto').checked)$('usbStatus').textContent=tr('裝置忙碌，已停止自動輪詢，等候完成通知。','Device busy. Auto polling paused until an idle notification.');
-      scheduleUsb();
+      if(!usbBusy)scheduleUsb();
     };
     $('usbAuto').checked=true;usbButtons();await syncUsb();
   }catch(e){
